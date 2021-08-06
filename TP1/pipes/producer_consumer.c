@@ -90,6 +90,7 @@ int main(int argc, char *argv[])
     }
     else if (id > 0)
     {
+        srandom(time(NULL));
         producer(atoi(argv[1]));
     }
     else
