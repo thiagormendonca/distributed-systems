@@ -17,8 +17,8 @@ int Np, Nc;
 clock_t start, end;
 
 //threads
-pthread_t **consumer_threads;
-pthread_t **producer_threads;
+pthread_t *consumer_threads;
+pthread_t *producer_threads;
 
 
 //semaphores
@@ -133,7 +133,7 @@ void consumer()
 //creates pre-defined number of producer threads
 void producerThreads(int num_threads)
 {
-    producer_threads = (pthread_t**)malloc(num_threads*sizeof(pthread_t*));
+    producer_threads = (pthread_t*)malloc(num_threads*sizeof(pthread_t*));
     for (int i = 0; i < num_threads; i++)
     {
         //states producer threads as producers
@@ -144,7 +144,7 @@ void producerThreads(int num_threads)
 //creates pre-defined number of consumer threads
 void consumerThreads(int num_threads)
 {
-    consumer_threads = (pthread_t**)malloc(num_threads*sizeof(pthread_t*));
+    consumer_threads = (pthread_t*)malloc(num_threads*sizeof(pthread_t*));
     // create num_threads threads that will produce numbers
     for (int i = 0; i < num_threads; i++)
     {
