@@ -8,7 +8,6 @@
 #include <math.h>
 #include <stdbool.h>
 
-
 int memory_size;
 int *memory;
 int consumed;
@@ -19,7 +18,6 @@ clock_t start, end;
 //threads
 pthread_t *consumer_threads;
 pthread_t *producer_threads;
-
 
 //semaphores
 sem_t mutex;
@@ -58,7 +56,7 @@ void insertNumber(int number)
     }
 }
 
-// consumes number in shared memory 
+// consumes number in shared memory
 void consume()
 {
     int number;
@@ -68,11 +66,13 @@ void consume()
         if (number != 0)
         {
             //answers if number is prime
-            if(isPrime(number) == 1){
-                printf("Consumer: %ls Is prime.", &number);
+            if (isPrime(number) == 1)
+            {
+                printf("Consumer: %d Is prime.\n", number);
             }
-            else{
-                printf("Consumer: %ls aint`t prime.", &number);
+            else
+            {
+                printf("Consumer: %d aint`t prime.\n", number);
             }
             memory[i] = 0;
             //increments consumed count
@@ -83,7 +83,7 @@ void consume()
 }
 
 //producer threads
-void producer()
+void *producer()
 {
     while (true)
     {
@@ -92,7 +92,7 @@ void producer()
         //awaits empty semaphore
         sem_wait(&empty_sem);
         sem_wait(&mutex);
-        
+
         // add number to shared memory
         insertNumber(number);
 
@@ -100,10 +100,12 @@ void producer()
         sem_post(&mutex);
         sem_post(&full);
     }
+
+    return NULL;
 }
 
 //consumer threads
-void consumer()
+void *consumer()
 {
     // race condition
     while (true)
@@ -122,37 +124,38 @@ void consumer()
 
             //execution time
             double runTime = ((double)(end - start)) / CLOCKS_PER_SEC;
-            printf("%i / %i / %i / %.20lf", memory_size, Np, Nc, runTime );
+            printf("%i;%i;%i;%.20lf;\n", memory_size, Np, Nc, runTime);
             exit(0);
         }
         sem_post(&mutex);
         sem_post(&empty_sem);
     }
+
+    return NULL;
 }
 
 //creates pre-defined number of producer threads
 void producerThreads(int num_threads)
 {
-    producer_threads = (pthread_t*)malloc(num_threads*sizeof(pthread_t*));
+    producer_threads = malloc(num_threads * sizeof(pthread_t));
     for (int i = 0; i < num_threads; i++)
     {
         //states producer threads as producers
-        producer_threads[i] = pthread_create(&producer_threads[i], NULL, (void *) &consumer, NULL);
+        pthread_create(&producer_threads[i], NULL, &consumer, NULL);
     }
 }
 
 //creates pre-defined number of consumer threads
 void consumerThreads(int num_threads)
 {
-    consumer_threads = (pthread_t*)malloc(num_threads*sizeof(pthread_t*));
+    consumer_threads = malloc(num_threads * sizeof(pthread_t));
     // create num_threads threads that will produce numbers
     for (int i = 0; i < num_threads; i++)
     {
         //states consumer threads as consumers
-        pthread_create(&consumer_threads[i], NULL, (void *) &consumer, NULL);
+        pthread_create(&consumer_threads[i], NULL, &producer, NULL);
     }
 }
-
 
 void joinProducerThreads(int Np)
 {
@@ -162,7 +165,6 @@ void joinProducerThreads(int Np)
     }
 }
 
-
 void joinConsumerThreads(int Nc)
 {
     for (int i = 0; i < Nc; i++)
@@ -171,25 +173,24 @@ void joinConsumerThreads(int Nc)
     }
 }
 
-
 int main()
 {
     srand(time(NULL));
     //Producer-consumer setup selection
     printf("Enter memory size:");
-    scanf("%d",&memory_size);
+    scanf("%d", &memory_size);
     printf("Enter Number of producers:");
-    scanf("%d",&Np);
+    scanf("%d", &Np);
     printf("Enter Number of consumers:");
-    scanf("%d",&Nc);
-    
+    scanf("%d", &Nc);
+
     //memory array with desired size
-    memory = (int*) malloc(memory_size * sizeof(int));//array of zeroes
-    
+    memory = malloc(memory_size * sizeof(int)); //array of zeroes
+
     //sempahores init and setup
-    sem_init(&mutex, 1, 1); //init mutex
+    sem_init(&mutex, 1, 1);          //init mutex
     sem_init(&full, 1, memory_size); //semaphore max size
-    sem_init(&empty_sem, 1, 0); //semaphore min size
+    sem_init(&empty_sem, 1, 0);      //semaphore min size
 
     //start execution time
     start = clock();
