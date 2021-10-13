@@ -33,12 +33,14 @@ def time_evolution(df):
     for i in range(len(df)):
         if (i == 0):
             continue
+        # compara tempo de cada linha com linha anterior
         if (df.iloc[i]['time'] < df.iloc[i - 1]['time']):
             return False
     return True
 
 
 def write_number(df, n, r):
+    # conta quantas escritas foram feitas por processo
     process_number = df.groupby('pid').count()
     if (len(process_number) != n or len(process_number[process_number['time'] != r]) > 0):
         return False
@@ -53,10 +55,12 @@ def coordinator_validation(df):
         pid = df.iloc[i]['pid']
 
         if (message == 'REQUEST'):
-            queue.put(pid)
+            queue.put(pid)  # insere na fila de REQUEST
         elif (message == 'GRANT'):
-            granted = pid
-        else:
+            granted = pid  # salva como último GRANT
+        else:  # RELEASE
+            # se mensagem não foi enviada pelo último processo que recebeu GRANT
+            # ou pelo processo na cabeça da fila
             if (pid != granted or pid != queue.get()):
                 return False
     return True

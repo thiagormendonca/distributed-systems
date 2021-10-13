@@ -8,7 +8,7 @@ F = 20
 
 def gen_message(type, pid):
     msg = '%d|' % type + str(pid) + '|'
-    return msg + '0' * (F - len(msg))
+    return msg + '0' * (F - len(msg))  # gera mensagem com F bytes
 
 
 def main():
@@ -20,8 +20,8 @@ def main():
     s.connect(('127.0.0.1', 8080))
 
     for i in range(r):
-        s.send(gen_message(1, pid).encode())
-        response = s.recv(F).decode()
+        s.send(gen_message(1, pid).encode())  # envia mensagem de REQUEST
+        response = s.recv(F).decode()  # aguarda por GRANT
 
         if (response == ''):
             return
@@ -32,7 +32,7 @@ def main():
                 f.write(str(time.time()) + ' ' + str(pid) + '\n')
 
             time.sleep(k)
-            s.send(gen_message(2, pid).encode())
+            s.send(gen_message(2, pid).encode())  # envia mensagem de RELEASE
 
     s.close()
 

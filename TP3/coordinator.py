@@ -54,12 +54,13 @@ def listener():
 
     while True:
         c, addr = s.accept()
+        # para cada conexão, cria uma thread
         Thread(target=connection, args=(c,), daemon=True).start()
 
 
 def connection(client):
     while True:
-        buffer = client.recv(F).decode()
+        buffer = client.recv(F).decode()  # espera novas mensagens do cliente
         if (buffer == ''):
             break
         msg, pid, zeros = buffer.split('|')
@@ -87,6 +88,7 @@ def terminal():
 
 
 def main():
+    # gera thread para escutar novas conexões
     Thread(target=listener, daemon=True).start()
     terminal()
 
